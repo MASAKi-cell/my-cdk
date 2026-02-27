@@ -11,8 +11,8 @@ export interface AuroraConstructProps {
 }
 
 export class Aurora extends Construct {
-  private readonly cluster: rds.DatabaseCluster;
-  private readonly dbSecret: secretsmanager.Secret;
+  public readonly cluster: rds.DatabaseCluster;
+  public readonly dbSecret: secretsmanager.Secret;
 
   constructor(scope: Construct, id: string, props: AuroraConstructProps) {
     super(scope, id);
