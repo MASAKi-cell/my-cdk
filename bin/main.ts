@@ -6,7 +6,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 const app = new cdk.App();
 
-new MyStack(app, "MyStack", {
+new MyStack(app, "MyAuroraDateAPIStack", {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
