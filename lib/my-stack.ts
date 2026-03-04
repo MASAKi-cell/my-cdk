@@ -3,6 +3,7 @@ import { Construct } from "constructs";
 import { Vpc } from "./vpc";
 import { Aurora } from "./aurora";
 import { LambdaConstruct } from "./lambda";
+import { ApiGateway } from "./gateway";
 
 export class MyStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -13,10 +14,12 @@ export class MyStack extends Stack {
       vpc: vpcConstruct.vpc,
     });
 
-    new LambdaConstruct(this, "Lambda", {
+    const lambdaConstruct = new LambdaConstruct(this, "Lambda", {
       vpc: vpcConstruct.vpc,
       cluster: auroraConstruct.cluster,
       dbSecret: auroraConstruct.dbSecret,
     });
+
+    new ApiGateway(this, "ApiGateway", lambdaConstruct.dataApiFunction);
   }
 }
