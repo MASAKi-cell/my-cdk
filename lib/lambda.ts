@@ -25,7 +25,7 @@ export class LambdaConstruct extends Construct {
     const { vpc, cluster, dbSecret } = props;
 
     // VPCエンドポイント
-    // PRIVATE_ISOLATED サブネットのためm、VPCエンドポイント経由で実施
+    // PRIVATE_ISOLATEDサブネットのため、VPCエンドポイント経由で実施
     vpc.addInterfaceEndpoint("SecretsManagerEndpoint", {
       service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
     });

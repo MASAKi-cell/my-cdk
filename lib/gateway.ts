@@ -10,6 +10,7 @@ export class ApiGateway extends Construct {
   constructor(scope: Construct, id: string, dataApiLambda: lambda.Function) {
     super(scope, id);
 
+    // apigatewayの構築
     this.api = new apigateway.RestApi(this, "Api", {
       restApiName: "Aurora Data API Service",
       deployOptions: {
@@ -26,6 +27,7 @@ export class ApiGateway extends Construct {
     health.addMethod(
       "GET",
       new apigateway.MockIntegration({
+        // モックデータ
         passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
         requestTemplates: { "application/json": '{"statusCode": 200}' },
         integrationResponses: [
