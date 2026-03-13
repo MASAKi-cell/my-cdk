@@ -38,6 +38,7 @@ export class Aurora extends Construct {
 
     // Aurora Serverless v2 クラスター
     this.cluster = new rds.DatabaseCluster(this, "AuroraServerlessCluster", {
+      clusterIdentifier: "aurora-serverless-cluster",
       engine: rds.DatabaseClusterEngine.auroraMysql({
         // Data API対応バージョンを選択
         version: rds.AuroraMysqlEngineVersion.VER_3_08_0,

@@ -12,7 +12,7 @@ export class ApiGateway extends Construct {
 
     // apigatewayの構築
     this.api = new apigateway.RestApi(this, "Api", {
-      restApiName: "Aurora Data API Service",
+      restApiName: "aurora-data-api-service",
       deployOptions: {
         stageName: "dev",
       },

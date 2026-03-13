@@ -45,6 +45,7 @@ export class LambdaConstruct extends Construct {
       this,
       "DataApiFunction",
       {
+        functionName: "aurora-data-api-function",
         runtime: lambda.Runtime.NODEJS_22_X,
         entry: path.join(__dirname, "../lambda/lambda-data-api.ts"),
         handler: "handler",
