@@ -1,0 +1,93 @@
+## 概要
+
+AWS CDK で Aurora Serverless v2 + Lambda で RDS Data API と環境を構築するリポジトリです。
+（MUST） AWS CDK 自体は初学者のため、学びながら理解を深めていきたい。
+
+## バージョン情報/構成
+
+- node v24.13.0
+- npm 11.6.2
+- AWS CDK 2.1106.0
+
+## 最終的なファイル構成
+
+```
+my-cdk
+├── bin
+│   └── main.ts                   # CDKアプリケーションのエントリーポイント
+├── lambda
+│   └── lambda-data-api.ts        # Data APIを使用するLambda関数
+├── lib
+│   ├── aurora.ts                 # Aurora Serverless v2を定義
+│   ├── gateway.ts                # API Gatewayを定義
+│   ├── lambda.ts                 # Lambda Constructを定義
+│   ├── my-stack.ts               # メインCDKスタック
+│   └── vpc.ts                    # VPCを定義
+```
+
+## 今回使用する構成
+
+- AWS CDK V2（TypeScript）
+- Amazon Aurora Serverless v2（MySQL）
+- Lambda（TypeScript）
+- Amazon RDS Data API
+- API Gateway
+
+## 実装内容
+
+Aurora Serverless v2 及び vpc 環境は構築済みです。
+
+- エンジン：Aurora MySQL
+- Serverless v2 のスケーリング範囲（ACU）：minACU / maxACU（例：0.5〜2）
+- defaultDatabaseName は「appdb」
+- マイグレーションは今回扱わないが、Prisma を使用する想定
+- 既存 VPC を使用
+- 将来に備えて DB 用 SG は作っておく
+- パスワードは Secrets Manager で自動生成 自動ローテーションを想定
+- Data API を呼ぶ主体は Lamdba
+- API Gateway 使用
+
+API Gateway のエンドポイント
+
+```
+GET /db → SELECT 1（DB疎通用） Lambda呼ぶ。返り値をそのままHTTPレスポンスにする。
+GET /health：DB触らずに200返す。（API疎通用）
+```
+
+### VPC / サブネット
+
+- Aurora Serverless v2 はプライベートサブネットに配置します。
+
+### Aurora Serverless v2 の設定
+
+- エンジン：Aurora MySQL
+- スケーリング範囲：min/max ACU 0.5~1
+
+### AWS Secrets Manager
+
+- DB の認証情報の設定を行います。
+- Data API においても、Secrets Manager のシークレットを参照します。
+
+### セキュリティグループ
+
+- Lambda 用セキュリティグループを作成（アウトバウンド全許可）
+- RDS Proxy は使用しない。Lambda は Data API（HTTPS）経由で Aurora に接続する。
+
+## 実装方針の決定事項
+
+### Lambda の配置場所
+- Lambda は VPC 内（PRIVATE_ISOLATED サブネット）に配置する。
+- PRIVATE_ISOLATED はインターネット出口がないため、VPC エンドポイントを追加して AWS サービスへアクセスする。
+- 追加する VPC エンドポイント（Interface タイプ）：
+  - `com.amazonaws.{region}.rds-data`（Data API 呼び出し用）
+  - `com.amazonaws.{region}.secretsmanager`（Secrets Manager 参照用）
+
+### RDS Proxy
+- 使用しない。Data API（HTTPS エンドポイント）経由で Aurora に接続するため不要。
+
+### API Gateway
+- HTTP API（`aws-apigatewayv2`）を使用する。REST API より軽量・安価。
+
+### Lambda のビルド方法
+- `NodejsFunction`（`aws-cdk-lib/aws-lambda-nodejs`）を使用する。
+- esbuild で自動バンドルされる。AWS SDK v3 は Lambda ランタイムに含まれるため、外部モジュール扱い（バンドルしない）。
